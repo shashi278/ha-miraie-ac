@@ -9,8 +9,21 @@ from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, Sen
 from homeassistant.components.recorder.statistics import (
     StatisticMetaData,
     async_add_external_statistics,
-    async_get_last_statistics,
 )
+try:
+    from homeassistant.components.recorder.statistics import async_get_last_statistics
+except ImportError:  # Older HA versions
+    from homeassistant.components.recorder.statistics import get_last_statistics
+
+    async def async_get_last_statistics(
+        hass: HomeAssistant,
+        number: int,
+        statistic_ids: list[str],
+        include_start_time: bool,
+    ):
+        return await hass.async_add_executor_job(
+            get_last_statistics, hass, number, statistic_ids, include_start_time
+        )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfEnergy
 from homeassistant.core import HomeAssistant
