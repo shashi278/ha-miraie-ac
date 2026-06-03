@@ -6,6 +6,7 @@ import aiohttp
 from miraie_ac import Device as MirAIeDevice, MirAIeHub, ConsumptionPeriodType
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.statistics import (
     StatisticData,
     StatisticMetaData,
@@ -198,7 +199,7 @@ async def async_backfill_energy_statistics(
         hub.http = aiohttp.ClientSession()
 
     statistic_id = f"{DOMAIN}:{device.id}_daily_energy"
-    last_stats = await hass.async_add_executor_job(
+    last_stats = await get_instance(hass).async_add_executor_job(
         get_last_statistics, hass, 1, statistic_id, False, {"sum"}
     )
 
@@ -206,7 +207,7 @@ async def async_backfill_energy_statistics(
     last_sum = 0.0
     if last_stats and last_stats.get(statistic_id):
         last = last_stats[statistic_id][0]
-        last_start = last["start"]
+        last_start = datetime.fromtimestamp(last["start"], tz=timezone.utc)
         start_date = last_start.date() + timedelta(days=1)
         last_sum = float(last.get("sum") or 0.0)
 
