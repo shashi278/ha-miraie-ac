@@ -7,6 +7,7 @@ from miraie_ac import Device as MirAIeDevice, MirAIeHub, ConsumptionPeriodType
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.components.recorder.statistics import (
+    StatisticData,
     StatisticMetaData,
     async_add_external_statistics,
 )
@@ -247,10 +248,7 @@ async def async_backfill_energy_statistics(
             continue
         running_sum += float(value)
         start_dt = datetime.combine(day, datetime.min.time(), tzinfo=timezone.utc)
-        end_dt = start_dt + timedelta(days=1)
-        statistics.append(
-            {"start": start_dt, "end": end_dt, "sum": running_sum, "state": running_sum}
-        )
+        statistics.append(StatisticData(start=start_dt, sum=running_sum, state=running_sum))
 
     if not statistics:
         LOGGER.info("Backfill: no new points built for %s", device.friendly_name)
@@ -264,11 +262,11 @@ async def async_backfill_energy_statistics(
         statistic_id=statistic_id,
         unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
     )
-    await async_add_external_statistics(hass, metadata, statistics)
+    async_add_external_statistics(hass, metadata, statistics)
     LOGGER.info(
         "Backfill: added %s daily points for %s (%s to %s)",
         len(statistics),
         device.friendly_name,
-        statistics[0]["start"].date().isoformat(),
-        statistics[-1]["start"].date().isoformat(),
+        statistics[0].start.date().isoformat(),
+        statistics[-1].start.date().isoformat(),
     )

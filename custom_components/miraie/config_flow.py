@@ -18,14 +18,22 @@ from .const import CONF_INSTALL_DATE, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-def six_months_ago(today: date) -> date:
-    month = today.month - 6
+def months_ago(today: date, months: int) -> date:
+    month = today.month - months
     year = today.year
     if month <= 0:
         month += 12
         year -= 1
     day = min(today.day, calendar.monthrange(year, month)[1])
     return date(year, month, day)
+
+
+def six_months_ago(today: date) -> date:
+    return months_ago(today, 6)
+
+
+def eight_months_ago(today: date) -> date:
+    return months_ago(today, 8)
 
 
 def parse_install_date(value: str) -> Optional[date]:
@@ -92,9 +100,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             info, install_date = await validate_input(self.hass, user_input)
             today = date.today()
             min_date = six_months_ago(today)
+            oldest_date = eight_months_ago(today)
             if install_date is None:
                 install_date = min_date
-            if install_date < min_date or install_date > today:
+            if install_date < oldest_date or install_date > today:
                 errors[CONF_INSTALL_DATE] = "invalid_install_date"
                 raise InvalidInstallDate
         except CannotConnect:
@@ -159,9 +168,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             install_date = parse_install_date(user_input.get(CONF_INSTALL_DATE, ""))
             today = date.today()
             min_date = six_months_ago(today)
+            oldest_date = eight_months_ago(today)
             if install_date is None:
                 install_date = min_date
-            if install_date < min_date or install_date > today:
+            if install_date < oldest_date or install_date > today:
                 errors[CONF_INSTALL_DATE] = "invalid_install_date"
                 raise InvalidInstallDate
         except InvalidInstallDate:
