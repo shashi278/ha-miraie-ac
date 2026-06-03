@@ -23,7 +23,7 @@ except ImportError:  # Older HA versions
         include_start_time: bool,
     ):
         return await hass.async_add_executor_job(
-            get_last_statistics, hass, number, statistic_ids, include_start_time
+            get_last_statistics, hass, number, statistic_ids, include_start_time, {"sum"}
         )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfEnergy
