@@ -10,21 +10,8 @@ from homeassistant.components.recorder.statistics import (
     StatisticData,
     StatisticMetaData,
     async_add_external_statistics,
+    get_last_statistics,
 )
-try:
-    from homeassistant.components.recorder.statistics import async_get_last_statistics
-except ImportError:  # Older HA versions
-    from homeassistant.components.recorder.statistics import get_last_statistics
-
-    async def async_get_last_statistics(
-        hass: HomeAssistant,
-        number: int,
-        statistic_ids: list[str],
-        include_start_time: bool,
-    ):
-        return await hass.async_add_executor_job(
-            get_last_statistics, hass, number, statistic_ids, include_start_time, {"sum"}
-        )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfEnergy
 from homeassistant.core import HomeAssistant
@@ -211,7 +198,9 @@ async def async_backfill_energy_statistics(
         hub.http = aiohttp.ClientSession()
 
     statistic_id = f"{DOMAIN}:{device.id}_daily_energy"
-    last_stats = await async_get_last_statistics(hass, 1, [statistic_id], True)
+    last_stats = await hass.async_add_executor_job(
+        get_last_statistics, hass, 1, statistic_id, False, {"sum"}
+    )
 
     start_date = default_start_date
     last_sum = 0.0
