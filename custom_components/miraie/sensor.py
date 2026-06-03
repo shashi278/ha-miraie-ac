@@ -211,7 +211,7 @@ async def async_backfill_energy_statistics(
         start_date = last_start.date() + timedelta(days=1)
         last_sum = float(last.get("sum") or 0.0)
 
-    end_date = datetime.today().date() - timedelta(days=1)
+    end_date = datetime.today().date()
     if start_date > end_date:
         LOGGER.info(
             "Backfill: no new daily data for %s (up to %s)",
