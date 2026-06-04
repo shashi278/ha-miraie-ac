@@ -230,6 +230,7 @@ async def async_backfill_energy_statistics(
 
     statistics = []
     running_sum = last_sum
+    first_day = last_day = None
     for key in sorted(daily.keys(), key=lambda k: datetime.strptime(k, "%d%m%Y").date()):
         day = datetime.strptime(key, "%d%m%Y").date()
         if day < start_date or day > end_date:
@@ -240,6 +241,9 @@ async def async_backfill_energy_statistics(
         running_sum += float(value)
         start_dt = datetime.combine(day, datetime.min.time(), tzinfo=timezone.utc)
         statistics.append(StatisticData(start=start_dt, sum=running_sum, state=running_sum))
+        if first_day is None:
+            first_day = day
+        last_day = day
 
     if not statistics:
         LOGGER.info("Backfill: no new points built for %s", device.friendly_name)
@@ -258,6 +262,6 @@ async def async_backfill_energy_statistics(
         "Backfill: added %s daily points for %s (%s to %s)",
         len(statistics),
         device.friendly_name,
-        statistics[0].start.date().isoformat(),
-        statistics[-1].start.date().isoformat(),
+        first_day.isoformat(),
+        last_day.isoformat(),
     )
