@@ -258,6 +258,7 @@ async def async_backfill_energy_statistics(
         source=DOMAIN,
         statistic_id=statistic_id,
         unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        unit_class="energy",
     )
     async_add_external_statistics(hass, metadata, statistics)
     LOGGER.info(
