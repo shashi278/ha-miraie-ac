@@ -9,6 +9,7 @@ from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, Sen
 from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.statistics import (
     StatisticData,
+    StatisticMeanType,
     StatisticMetaData,
     async_add_external_statistics,
     get_last_statistics,
@@ -251,6 +252,7 @@ async def async_backfill_energy_statistics(
 
     metadata = StatisticMetaData(
         has_mean=False,
+        mean_type=StatisticMeanType.NONE,
         has_sum=True,
         name=f"{device.friendly_name} Daily Energy",
         source=DOMAIN,
