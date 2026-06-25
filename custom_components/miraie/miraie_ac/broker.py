@@ -45,7 +45,12 @@ class MirAIeBroker:
         context = None
 
         if self.use_ssl:
-            context = ssl.create_default_context(cafile=certifi.where())
+            ca_file = await asyncio.get_event_loop().run_in_executor(
+                None, certifi.where
+            )
+            context = await asyncio.get_event_loop().run_in_executor(
+                None, lambda: ssl.create_default_context(cafile=ca_file)
+            )
 
         while True:
             try:
